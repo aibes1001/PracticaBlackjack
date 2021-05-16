@@ -34,6 +34,18 @@ public class Deck : MonoBehaviour
          * En principio, la posición de cada valor se deberá corresponder con la posición de faces. 
          * Por ejemplo, si en faces[1] hay un 2 de corazones, en values[1] debería haber un 2.
          */
+        int valor = 1;
+
+        for(int i = 0; i < 52; i++)
+        {
+            if(i%13 == 0)
+            {
+                valor = 1;
+            }
+
+            values[i] = valor;
+            valor++;
+        }
     }
 
     private void ShuffleCards()
@@ -42,7 +54,23 @@ public class Deck : MonoBehaviour
          * Barajar las cartas aleatoriamente.
          * El método Random.Range(0,n), devuelve un valor entre 0 y n-1
          * Si lo necesitas, puedes definir nuevos arrays.
-         */       
+         */
+
+        int n = values.Length;
+        while (n > 1)
+        {
+            n--;
+            int r = Random.Range(0, n + 1);
+
+            var value = values[r];
+            var face = faces[r];
+
+            values[r] = values[n];
+            faces[r] = faces[n];
+
+            values[n] = value;
+            faces[n] = face;
+        }
     }
 
     void StartGame()
