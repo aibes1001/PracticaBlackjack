@@ -23,7 +23,7 @@ public class Deck : MonoBehaviour
 
     private void Start()
     {
-        ShuffleCards();
+        //ShuffleCards();
         StartGame();        
     }
 
@@ -34,17 +34,26 @@ public class Deck : MonoBehaviour
          * En principio, la posición de cada valor se deberá corresponder con la posición de faces. 
          * Por ejemplo, si en faces[1] hay un 2 de corazones, en values[1] debería haber un 2.
          */
-        int valor = 1;
+        int valor = 2;
 
         for(int i = 0; i < 52; i++)
         {
             if(i%13 == 0)
             {
-                valor = 1;
+                valor = 11;
+                values[i] = valor;
+                valor = 2;
             }
-
-            values[i] = valor;
-            valor++;
+            else if (i % 13 >= 10 && i % 13 <= 12)
+            {
+                valor = 10;
+                values[i] = valor;
+            }
+            else
+            {
+                values[i] = valor;
+                valor++;
+            }
         }
     }
 
@@ -79,9 +88,28 @@ public class Deck : MonoBehaviour
         {
             PushPlayer();
             PushDealer();
+
             /*TODO:
              * Si alguno de los dos obtiene Blackjack, termina el juego y mostramos mensaje
              */
+            if (player.GetComponent<CardHand>().points == 21 && player.GetComponent<CardHand>().points == dealer.GetComponent<CardHand>().points)
+            {
+                finalMessage.text = "Empate";
+                finalMessage.color = Color.grey;
+            }
+            else if (player.GetComponent<CardHand>().points == 21 || dealer.GetComponent<CardHand>().points > 21)
+            {
+                finalMessage.text = "Has Ganado";
+                finalMessage.color = Color.green;
+            }else if (dealer.GetComponent<CardHand>().points == 21 || player.GetComponent<CardHand>().points > 21)
+            {
+                finalMessage.text = "Has perdido";
+                finalMessage.color = Color.red;
+            }
+
+            finalMessage.text = "Empate";
+            finalMessage.color = Color.grey;
+
         }
     }
 
