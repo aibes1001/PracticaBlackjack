@@ -23,7 +23,7 @@ public class Deck : MonoBehaviour
 
     private void Start()
     {
-        //ShuffleCards();
+        ShuffleCards();
         StartGame();        
     }
 
@@ -88,29 +88,12 @@ public class Deck : MonoBehaviour
         {
             PushPlayer();
             PushDealer();
-
-            /*TODO:
-             * Si alguno de los dos obtiene Blackjack, termina el juego y mostramos mensaje
-             */
-            if (player.GetComponent<CardHand>().points == 21 && player.GetComponent<CardHand>().points == dealer.GetComponent<CardHand>().points)
-            {
-                finalMessage.text = "Empate";
-                finalMessage.color = Color.grey;
-            }
-            else if (player.GetComponent<CardHand>().points == 21 || dealer.GetComponent<CardHand>().points > 21)
-            {
-                finalMessage.text = "Has Ganado";
-                finalMessage.color = Color.green;
-            }else if (dealer.GetComponent<CardHand>().points == 21 || player.GetComponent<CardHand>().points > 21)
-            {
-                finalMessage.text = "Has perdido";
-                finalMessage.color = Color.red;
-            }
-
-            finalMessage.text = "Empate";
-            finalMessage.color = Color.grey;
-
         }
+        /*TODO:
+         * Si alguno de los dos obtiene Blackjack, termina el juego y mostramos mensaje
+         */
+        comprovarPuntuacionJugador();
+
     }
 
     private void CalculateProbabilities()
@@ -153,22 +136,25 @@ public class Deck : MonoBehaviour
 
         /*TODO:
          * Comprobamos si el jugador ya ha perdido y mostramos mensaje
-         */      
+         */
+        comprovarPuntuacionJugador();
 
     }
 
     public void Stand()
     {
+
         /*TODO: 
          * Si estamos en la mano inicial, debemos voltear la primera carta del dealer.
          */
+      
 
         /*TODO:
          * Repartimos cartas al dealer si tiene 16 puntos o menos
          * El dealer se planta al obtener 17 puntos o más
          * Mostramos el mensaje del que ha ganado
-         */                
-         
+         */
+
     }
 
     public void PlayAgain()
@@ -181,6 +167,45 @@ public class Deck : MonoBehaviour
         cardIndex = 0;
         ShuffleCards();
         StartGame();
+        hitButton.enabled = true;
+        stickButton.enabled = true;
+    }
+
+    //Metodo para comprovar las puntuaciones al repartir las cartas (caso de que alguno de los 2 tena 21 al principio)
+    void comprovarPuntuacionJugador()
+    {
+        Debug.Log("Jugador: " + player.GetComponent<CardHand>().points);
+        Debug.Log("Dealer: " + dealer.GetComponent<CardHand>().points);
+        if (player.GetComponent<CardHand>().points == 21 && player.GetComponent<CardHand>().points == dealer.GetComponent<CardHand>().points)
+        {
+            finalMessage.text = "Empate";
+            finalMessage.color = Color.grey;
+            final();
+        }
+        else if (player.GetComponent<CardHand>().points == 21 || dealer.GetComponent<CardHand>().points > 21)
+        {
+            finalMessage.text = "Has Ganado";
+            finalMessage.color = Color.green;
+            final();
+        }
+        else if (dealer.GetComponent<CardHand>().points == 21 || player.GetComponent<CardHand>().points > 21)
+        {
+            finalMessage.text = "Has perdido";
+            finalMessage.color = Color.red;
+            final();
+        }
+    }
+
+
+    void final()
+    {
+        //Deshabilitar botones de Hit y stand
+        hitButton.enabled = false;
+        stickButton.enabled = false;
+
+        //En caso de ser una victoria al inicio, mostrar la ca carta oculta del dealer
+        GameObject card = dealer.GetComponent<CardHand>().cards[0];
+        card.GetComponent<CardModel>().ToggleFace(true);
     }
     
 }
