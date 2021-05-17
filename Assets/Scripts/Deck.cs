@@ -147,13 +147,25 @@ public class Deck : MonoBehaviour
         /*TODO: 
          * Si estamos en la mano inicial, debemos voltear la primera carta del dealer.
          */
-      
+        hitButton.enabled = false;
+        GameObject card = dealer.GetComponent<CardHand>().cards[0];
+        card.GetComponent<CardModel>().ToggleFace(true);
 
         /*TODO:
          * Repartimos cartas al dealer si tiene 16 puntos o menos
          * El dealer se planta al obtener 17 puntos o más
          * Mostramos el mensaje del que ha ganado
          */
+
+        if (!puntuacionTurnoDealer())
+        {
+            PushDealer();
+            puntuacionTurnoDealer();
+        }
+
+
+        Debug.Log("Jugador: " + player.GetComponent<CardHand>().points);
+        Debug.Log("Dealer: " + dealer.GetComponent<CardHand>().points);
 
     }
 
@@ -207,5 +219,47 @@ public class Deck : MonoBehaviour
         GameObject card = dealer.GetComponent<CardHand>().cards[0];
         card.GetComponent<CardModel>().ToggleFace(true);
     }
-    
+
+    //Metodo para comprovar si la puntuacion del dealer es superior a 16 y, en tal caso, comprobar el ganador de la partida
+    // Devuelve true si hay ganador, y false si no lo hay;
+    bool puntuacionTurnoDealer()
+    {
+        if (dealer.GetComponent<CardHand>().points >= 17)
+        {
+            if (player.GetComponent<CardHand>().points == dealer.GetComponent<CardHand>().points)
+            {
+                finalMessage.text = "Empate";
+                finalMessage.color = Color.grey;
+            }
+            else if (player.GetComponent<CardHand>().points > dealer.GetComponent<CardHand>().points || dealer.GetComponent<CardHand>().points > 21)
+            {
+                finalMessage.text = "Has Ganado";
+                finalMessage.color = Color.green;
+            }
+            else
+            {
+                finalMessage.text = "Has perdido";
+                finalMessage.color = Color.red;
+            }
+            stickButton.enabled = false;
+
+            return true;
+        }
+        else
+        {
+            return false;
+        }
+    }
+
+    void final()
+    {
+        //Deshabilitar botones de Hit y stand
+        hitButton.enabled = false;
+        stickButton.enabled = false;
+
+        //En caso de ser una victoria al inicio, mostrar la ca carta oculta del dealer
+        GameObject card = dealer.GetComponent<CardHand>().cards[0];
+        card.GetComponent<CardModel>().ToggleFace(true);
+    }
+
 }
