@@ -251,15 +251,4 @@ public class Deck : MonoBehaviour
         }
     }
 
-    void final()
-    {
-        //Deshabilitar botones de Hit y stand
-        hitButton.enabled = false;
-        stickButton.enabled = false;
-
-        //En caso de ser una victoria al inicio, mostrar la ca carta oculta del dealer
-        GameObject card = dealer.GetComponent<CardHand>().cards[0];
-        card.GetComponent<CardModel>().ToggleFace(true);
-    }
-
 }
