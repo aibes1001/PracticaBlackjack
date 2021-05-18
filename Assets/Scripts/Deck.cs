@@ -93,6 +93,7 @@ public class Deck : MonoBehaviour
          * Si alguno de los dos obtiene Blackjack, termina el juego y mostramos mensaje
          */
         comprovarPuntuacionJugador();
+        CalculateProbabilities();
 
     }
 
@@ -104,7 +105,51 @@ public class Deck : MonoBehaviour
          * - Probabilidad de que el jugador obtenga entre un 17 y un 21 si pide una carta
          * - Probabilidad de que el jugador obtenga más de 21 si pide una carta          
          */
+        probabilidadDealerMayorPuntuacion();
+
+       
+
+        
     }
+
+    void probabilidadDealerMayorPuntuacion()
+    {
+        int index = cardIndex;
+        int puntosJugador = player.GetComponent<CardHand>().points;
+        int puntosCartaDescubiertaDealer = dealer.GetComponent<CardHand>().cards[1].GetComponent<CardModel>().value;
+        int numCartasMayor = 0;
+
+        //Es calcula el valor de la carta per a que la puntuació dels 2 jugadors siga igual
+        int valorMinCartaOculta = puntosJugador - puntosCartaDescubiertaDealer;
+
+        //Calcular el nº de cartes amb valor igual o superior a "valorCartaSuperior" 
+        //Primer, es mira si el valor de la carta oculta és major que el valor que faria empatar als 2 jugadors
+        if (values[1] > valorMinCartaOculta)
+        {
+            numCartasMayor++;
+        }
+
+        //A continuació es mira el valor de les cartes restants de la baralla
+        for (int i = index; i < values.Length; i++)
+        {
+            if (valorMinCartaOculta < values[i])
+            {
+                numCartasMayor++;
+            }
+        }
+
+        //Es mira quantes cartes hi ha a la taula sense contar la carta oculta
+        float numCartasMesa = values.Length - index + 1f;
+        //Calcular la probabilitat de tindre 
+        float a = numCartasMayor / numCartasMesa;
+
+        Debug.Log(valorMinCartaOculta);
+        Debug.Log(numCartasMesa);
+        Debug.Log(numCartasMayor);
+
+        probMessage.text = "Probabilidad de que el dealer tenga más puntuación: " + (System.Math.Round(a * 100, 2)).ToString() + " %";
+    }
+
 
     void PushDealer()
     {
@@ -122,7 +167,16 @@ public class Deck : MonoBehaviour
          */
         player.GetComponent<CardHand>().Push(faces[cardIndex], values[cardIndex]/*,cardCopy*/);
         cardIndex++;
-        CalculateProbabilities();
+
+        try
+        {
+            CalculateProbabilities();
+        }
+        catch
+        {
+
+        }
+        
     }       
 
     public void Hit()
@@ -157,11 +211,12 @@ public class Deck : MonoBehaviour
          * Mostramos el mensaje del que ha ganado
          */
 
-        if (!puntuacionTurnoDealer())
+        while (dealer.GetComponent<CardHand>().points < 17)
         {
             PushDealer();
-            puntuacionTurnoDealer();
         }
+
+        puntuacionTurnoDealer();
 
 
         Debug.Log("Jugador: " + player.GetComponent<CardHand>().points);
@@ -222,7 +277,7 @@ public class Deck : MonoBehaviour
 
     //Metodo para comprovar si la puntuacion del dealer es superior a 16 y, en tal caso, comprobar el ganador de la partida
     // Devuelve true si hay ganador, y false si no lo hay;
-    bool puntuacionTurnoDealer()
+    void puntuacionTurnoDealer()
     {
         if (dealer.GetComponent<CardHand>().points >= 17)
         {
@@ -242,12 +297,6 @@ public class Deck : MonoBehaviour
                 finalMessage.color = Color.red;
             }
             stickButton.enabled = false;
-
-            return true;
-        }
-        else
-        {
-            return false;
         }
     }
 
