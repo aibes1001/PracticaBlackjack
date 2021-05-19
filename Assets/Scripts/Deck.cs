@@ -349,18 +349,22 @@ public class Deck : MonoBehaviour
             finalMessage.text = "Empate";
             finalMessage.color = Color.grey;
             final();
+            player.GetComponent<Banca>().apuestaEmpatada();
+
         }
         else if (player.GetComponent<CardHand>().points == 21 || dealer.GetComponent<CardHand>().points > 21)
         {
             finalMessage.text = "Has Ganado";
             finalMessage.color = Color.green;
             final();
+            player.GetComponent<Banca>().apuestaGanada();
         }
         else if (dealer.GetComponent<CardHand>().points == 21 || player.GetComponent<CardHand>().points > 21)
         {
             finalMessage.text = "Has perdido";
             finalMessage.color = Color.red;
-            final();   
+            final();
+            player.GetComponent<Banca>().apuestaPerdida();
         }
     }
 
@@ -376,6 +380,7 @@ public class Deck : MonoBehaviour
         card.GetComponent<CardModel>().ToggleFace(true);
     }
 
+
     //Metodo para comprovar si la puntuacion del dealer es superior a 16 y, en tal caso, comprobar el ganador de la partida
     // Devuelve true si hay ganador, y false si no lo hay;
     void puntuacionTurnoDealer()
@@ -386,16 +391,19 @@ public class Deck : MonoBehaviour
             {
                 finalMessage.text = "Empate";
                 finalMessage.color = Color.grey;
+                player.GetComponent<Banca>().apuestaEmpatada();
             }
             else if (player.GetComponent<CardHand>().points > dealer.GetComponent<CardHand>().points || dealer.GetComponent<CardHand>().points > 21)
             {
                 finalMessage.text = "Has Ganado";
                 finalMessage.color = Color.green;
+                player.GetComponent<Banca>().apuestaGanada();
             }
             else
             {
                 finalMessage.text = "Has perdido";
                 finalMessage.color = Color.red;
+                player.GetComponent<Banca>().apuestaPerdida();
             }
             stickButton.interactable = false;
         }
