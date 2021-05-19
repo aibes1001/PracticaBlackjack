@@ -11,6 +11,11 @@ public class Deck : MonoBehaviour
     public Button playAgainButton;
     public Text finalMessage;
     public Text probMessage;
+    public Text prob1721;
+    public Text probMayor21;
+    public Text puntosJugador;
+    public Text puntosDealer;
+
 
     public int[] values = new int[52];
     int cardIndex = 0;    
@@ -106,45 +111,136 @@ public class Deck : MonoBehaviour
          * - Probabilidad de que el jugador obtenga más de 21 si pide una carta          
          */
         probabilidadDealerMayorPuntuacion();
+        probabilidad17_21();
+        probabilidadMayor21();
 
-       
 
-        
+
+
+
+    }
+
+    void probabilidadMayor21()
+    {
+        int puntosJugador = player.GetComponent<CardHand>().points;
+        int numCartas = 0;
+
+        bool asEsUno = false;
+
+        //Si els punts són igual o superior a 11, els asos valen 1
+        if (puntosJugador >= 11)
+        {
+            asEsUno = true;
+        }
+
+        for (int i = cardIndex; i < values.Length; i++)
+        {
+            int puntosCarta = values[i];
+            if (asEsUno && values[i] == 11)
+            {
+                puntosCarta = 1;
+            }
+            if ((puntosJugador + puntosCarta) > 21)
+            {
+                numCartas++;
+            }
+        }
+
+        //Es mira quantes cartes hi ha a la baralla sense contar la carta oculta ja que és del dealer
+        float numCartasBaraja = values.Length - cardIndex;
+        //Calcular la probabilitat de tindre 
+        float a = numCartas / numCartasBaraja;
+
+        probMayor21.text = "Probabilidad de tener más de 21 en la próxima carta: " + (System.Math.Round(a * 100, 2)).ToString() + " %";
+    }
+
+    void probabilidad17_21()
+    {
+        int puntosJugador = player.GetComponent<CardHand>().points;
+        int numCartas = 0;
+
+        bool asEsUno = false;
+
+        //Si els punts són igual o superior a 11, els asos valen 1
+        if (puntosJugador >= 11)
+        {
+            asEsUno = true;  
+        }
+
+        for (int i = cardIndex; i < values.Length; i++)
+        {
+            int puntosCarta = values[i];
+            if (asEsUno && values[i] == 11)
+            {
+                puntosCarta = 1;
+            }
+            if ((puntosJugador + puntosCarta) >= 17 && (puntosJugador + puntosCarta) <= 21)
+            {
+                numCartas++;
+            }
+        }
+
+        //Es mira quantes cartes hi ha a la baralla sense contar la carta oculta ja que és del dealer
+        float numCartasBaraja = values.Length - cardIndex;
+        //Calcular la probabilitat de tindre 
+        float a = numCartas / numCartasBaraja;
+
+        prob1721.text = "Probabilidad de tener entre un 17 y un 21 en la próxima carta: " + (System.Math.Round(a * 100, 2)).ToString() + " %";
     }
 
     void probabilidadDealerMayorPuntuacion()
     {
-        int index = cardIndex;
         int puntosJugador = player.GetComponent<CardHand>().points;
         int puntosCartaDescubiertaDealer = dealer.GetComponent<CardHand>().cards[1].GetComponent<CardModel>().value;
         int numCartasMayor = 0;
+        bool asEsUno = false;
 
         //Es calcula el valor de la carta per a que la puntuació dels 2 jugadors siga igual
         int valorMinCartaOculta = puntosJugador - puntosCartaDescubiertaDealer;
 
+        //Si la carta descoberta del dealer és un as, els altres asos valdràn 1 (cas que el jugador tinga 12 i dealer tinga dos asos = 12 punts)
+        if (puntosCartaDescubiertaDealer == 11)
+        {
+            asEsUno = true;
+
+        }
+        //Valor de la carta oculta
+        int valorCarta = values[1];
+
+
         //Calcular el nº de cartes amb valor igual o superior a "valorCartaSuperior" 
         //Primer, es mira si el valor de la carta oculta és major que el valor que faria empatar als 2 jugadors
-        if (values[1] > valorMinCartaOculta)
+        if (asEsUno && valorCarta == 11)
+        {
+            valorCarta = 1;
+        }
+
+        if (valorCarta > valorMinCartaOculta)
         {
             numCartasMayor++;
         }
 
         //A continuació es mira el valor de les cartes restants de la baralla
-        for (int i = index; i < values.Length; i++)
+        for (int i = cardIndex; i < values.Length; i++)
         {
-            if (valorMinCartaOculta < values[i])
+            valorCarta = values[i];
+            if (asEsUno && valorCarta == 11)
+            {
+                valorCarta = 1;
+            }
+            if (valorMinCartaOculta < valorCarta)
             {
                 numCartasMayor++;
             }
         }
 
-        //Es mira quantes cartes hi ha a la taula sense contar la carta oculta
-        float numCartasMesa = values.Length - index + 1f;
+        //Es mira quantes cartes hi ha a la baralla contant la carta oculta
+        float numCartasBaraja = values.Length - cardIndex + 1f;
         //Calcular la probabilitat de tindre 
-        float a = numCartasMayor / numCartasMesa;
+        float a = numCartasMayor / numCartasBaraja;
 
         Debug.Log(valorMinCartaOculta);
-        Debug.Log(numCartasMesa);
+        Debug.Log(numCartasBaraja);
         Debug.Log(numCartasMayor);
 
         probMessage.text = "Probabilidad de que el dealer tenga más puntuación: " + (System.Math.Round(a * 100, 2)).ToString() + " %";
@@ -157,7 +253,8 @@ public class Deck : MonoBehaviour
          * Dependiendo de cómo se implemente ShuffleCards, es posible que haya que cambiar el índice.
          */
         dealer.GetComponent<CardHand>().Push(faces[cardIndex],values[cardIndex]);
-        cardIndex++;        
+        cardIndex++;
+        puntosDealer.text = "Puntos del dealer: " + dealer.GetComponent<CardHand>().points;
     }
 
     void PushPlayer()
@@ -176,7 +273,11 @@ public class Deck : MonoBehaviour
         {
 
         }
-        
+
+       // int puntos = player.GetComponent<CardHand>().points;
+        puntosJugador.text = "Puntos del jugador: " + (player.GetComponent<CardHand>().points).ToString();
+
+
     }       
 
     public void Hit()
@@ -201,7 +302,7 @@ public class Deck : MonoBehaviour
         /*TODO: 
          * Si estamos en la mano inicial, debemos voltear la primera carta del dealer.
          */
-        hitButton.enabled = false;
+        hitButton.interactable = false;
         GameObject card = dealer.GetComponent<CardHand>().cards[0];
         card.GetComponent<CardModel>().ToggleFace(true);
 
@@ -259,7 +360,7 @@ public class Deck : MonoBehaviour
         {
             finalMessage.text = "Has perdido";
             finalMessage.color = Color.red;
-            final();
+            final();   
         }
     }
 
@@ -267,10 +368,10 @@ public class Deck : MonoBehaviour
     void final()
     {
         //Deshabilitar botones de Hit y stand
-        hitButton.enabled = false;
-        stickButton.enabled = false;
+        hitButton.interactable = false;
+        stickButton.interactable = false;
 
-        //En caso de ser una victoria al inicio, mostrar la ca carta oculta del dealer
+        //En caso de ser una victoria al inicio, mostrar la carta oculta del dealer
         GameObject card = dealer.GetComponent<CardHand>().cards[0];
         card.GetComponent<CardModel>().ToggleFace(true);
     }
@@ -296,7 +397,7 @@ public class Deck : MonoBehaviour
                 finalMessage.text = "Has perdido";
                 finalMessage.color = Color.red;
             }
-            stickButton.enabled = false;
+            stickButton.interactable = false;
         }
     }
 
