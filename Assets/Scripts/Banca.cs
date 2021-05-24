@@ -13,6 +13,7 @@ public class Banca : MonoBehaviour
     public Text cifraApuesta;
     public Button mas10;
     public Button menos10;
+    public bool apostar = true;
 
 
 

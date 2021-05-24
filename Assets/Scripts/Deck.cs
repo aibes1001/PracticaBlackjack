@@ -15,21 +15,31 @@ public class Deck : MonoBehaviour
     public Text probMayor21;
     public Text puntosJugador;
     public Text puntosDealer;
-
+    public Button apostar;
 
     public int[] values = new int[52];
     int cardIndex = 0;    
        
     private void Awake()
     {    
-        InitCardValues();        
-
+        InitCardValues();
     }
 
-    private void Start()
+    void Start()
     {
+        hitButton.interactable = false;
+        stickButton.interactable = false;
+    }
+
+    public void inicio()
+    {
+        apostar.interactable = false;
+        hitButton.interactable = true;
+        stickButton.interactable = true;
+        player.GetComponent<Banca>().mas10.interactable = false;
+        player.GetComponent<Banca>().menos10.interactable = false;
         ShuffleCards();
-        StartGame();        
+        StartGame();
     }
 
     private void InitCardValues()
@@ -113,11 +123,6 @@ public class Deck : MonoBehaviour
         probabilidadDealerMayorPuntuacion();
         probabilidad17_21();
         probabilidadMayor21();
-
-
-
-
-
     }
 
     void probabilidadMayor21()
@@ -198,7 +203,7 @@ public class Deck : MonoBehaviour
         //Es calcula el valor de la carta per a que la puntuació dels 2 jugadors siga igual
         int valorMinCartaOculta = puntosJugador - puntosCartaDescubiertaDealer;
 
-        //Si la carta descoberta del dealer és un as, els altres asos valdràn 1 (cas que el jugador tinga 12 i dealer tinga dos asos = 12 punts)
+        //Si la carta descoberta del dealer és un as, els altres asos valdran 1 (cas que el jugador tinga 12 i dealer tinga dos asos = 12 punts)
         if (puntosCartaDescubiertaDealer == 11)
         {
             asEsUno = true;
@@ -208,7 +213,7 @@ public class Deck : MonoBehaviour
         int valorCarta = values[1];
 
 
-        //Calcular el nº de cartes amb valor igual o superior a "valorCartaSuperior" 
+        //Calcular el nº de cartes amb valor superior a "valorMinCartaOculta" 
         //Primer, es mira si el valor de la carta oculta és major que el valor que faria empatar als 2 jugadors
         if (asEsUno && valorCarta == 11)
         {
@@ -228,7 +233,7 @@ public class Deck : MonoBehaviour
             {
                 valorCarta = 1;
             }
-            if (valorMinCartaOculta < valorCarta)
+            if (valorCarta > valorMinCartaOculta)
             {
                 numCartasMayor++;
             }
@@ -238,10 +243,6 @@ public class Deck : MonoBehaviour
         float numCartasBaraja = values.Length - cardIndex + 1f;
         //Calcular la probabilitat de tindre 
         float a = numCartasMayor / numCartasBaraja;
-
-        Debug.Log(valorMinCartaOculta);
-        Debug.Log(numCartasBaraja);
-        Debug.Log(numCartasMayor);
 
         probMessage.text = "Probabilidad de que el dealer tenga más puntuación: " + (System.Math.Round(a * 100, 2)).ToString() + " %";
     }
@@ -274,10 +275,7 @@ public class Deck : MonoBehaviour
 
         }
 
-       // int puntos = player.GetComponent<CardHand>().points;
         puntosJugador.text = "Puntos del jugador: " + (player.GetComponent<CardHand>().points).ToString();
-
-
     }       
 
     public void Hit()
@@ -327,23 +325,21 @@ public class Deck : MonoBehaviour
 
     public void PlayAgain()
     {
-        hitButton.interactable = true;
-        stickButton.interactable = true;
         finalMessage.text = "";
         player.GetComponent<CardHand>().Clear();
         dealer.GetComponent<CardHand>().Clear();          
         cardIndex = 0;
-        ShuffleCards();
-        StartGame();
-        hitButton.enabled = true;
-        stickButton.enabled = true;
+        //ShuffleCards();
+        //StartGame();
+        apostar.interactable = true;
+        puntosJugador.text = "Puntos del jugador: " + 0.ToString();
+        puntosDealer.text = "Puntos del jugador: " + 0.ToString();
     }
 
-    //Metodo para comprovar las puntuaciones al repartir las cartas (caso de que alguno de los 2 tena 21 al principio)
+    // Metodo para comprovar las puntuaciones al repartir las cartas (caso de que alguno de los 2 tenga 21 al principio
+    // o gane/pierda el jugador sin haber jugado el dealer)
     void comprovarPuntuacionJugador()
     {
-        Debug.Log("Jugador: " + player.GetComponent<CardHand>().points);
-        Debug.Log("Dealer: " + dealer.GetComponent<CardHand>().points);
         if (player.GetComponent<CardHand>().points == 21 && player.GetComponent<CardHand>().points == dealer.GetComponent<CardHand>().points)
         {
             finalMessage.text = "Empate";
@@ -368,21 +364,7 @@ public class Deck : MonoBehaviour
         }
     }
 
-
-    void final()
-    {
-        //Deshabilitar botones de Hit y stand
-        hitButton.interactable = false;
-        stickButton.interactable = false;
-
-        //En caso de ser una victoria al inicio, mostrar la carta oculta del dealer
-        GameObject card = dealer.GetComponent<CardHand>().cards[0];
-        card.GetComponent<CardModel>().ToggleFace(true);
-    }
-
-
     //Metodo para comprovar si la puntuacion del dealer es superior a 16 y, en tal caso, comprobar el ganador de la partida
-    // Devuelve true si hay ganador, y false si no lo hay;
     void puntuacionTurnoDealer()
     {
         if (dealer.GetComponent<CardHand>().points >= 17)
@@ -407,6 +389,17 @@ public class Deck : MonoBehaviour
             }
             stickButton.interactable = false;
         }
+    }
+
+    void final()
+    {
+        //En caso de ser una victoria al inicio, mostrar la carta oculta del dealer
+        GameObject card = dealer.GetComponent<CardHand>().cards[0];
+        card.GetComponent<CardModel>().ToggleFace(true);
+
+        //Deshabilitar botones de Hit y stand
+        hitButton.interactable = false;
+        stickButton.interactable = false;
     }
 
 }
